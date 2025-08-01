@@ -22,7 +22,7 @@ def data_iter(batch_size: int, features: Tensor, labels: Tensor) -> Generator[Tu
     indices = list(range(num_examples))
     random.shuffle(indices)
     for i in range(0, num_examples, batch_size):
-        batch_indices = torch.tensor(indices[i:min(i + batch_size, num_examples)])
+        batch_indices = indices[i:min(i + batch_size, num_examples)]
         yield features[batch_indices], labels[batch_indices]
 
 # 从输入层，到输出层，前向传播
