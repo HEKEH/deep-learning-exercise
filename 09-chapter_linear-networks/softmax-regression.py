@@ -5,12 +5,13 @@ import sys
 import os
 from torch import Tensor
 from d2l import torch as d2l
-from typing import List
+from typing import List, Tuple, Optional, Union, Any
 import torchvision
 from torchvision import transforms
+from torch.utils.data import DataLoader
 
 # 配置matplotlib后端
-def setup_matplotlib():
+def setup_matplotlib() -> bool:
     """配置matplotlib以确保图形能正常显示"""
     try:
         # 检查是否在Jupyter环境中
@@ -42,21 +43,22 @@ def setup_matplotlib():
 setup_matplotlib()
 
 class Accumulator:
-    def __init__(self, n):
+    def __init__(self, n: int) -> None:
         self.data = [0.0] * n
-    def add(self, *args):
+    def add(self, *args: float) -> None:
         self.data = [a + float(b) for a, b in zip(self.data, args)]
-    def reset(self):
+    def reset(self) -> None:
         self.data = [0.0] * len(self.data)
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> float:
         return self.data[idx]
 
 class Animator:
     """在动画中绘制数据"""
-    def __init__(self, xlabel=None, ylabel=None, legend=None, xlim=None,
-                 ylim=None, xscale='linear', yscale='linear',
-                 fmts=('-', 'm--', 'g-.', 'r:'), nrows=1, ncols=1,
-                 figsize=(10, 6)):
+    def __init__(self, xlabel: Optional[str] = None, ylabel: Optional[str] = None,
+                 legend: Optional[List[str]] = None, xlim: Optional[Tuple[float, float]] = None,
+                 ylim: Optional[Tuple[float, float]] = None, xscale: str = 'linear',
+                 yscale: str = 'linear', fmts: Tuple[str, ...] = ('-', 'm--', 'g-.', 'r:'),
+                 nrows: int = 1, ncols: int = 1, figsize: Tuple[float, float] = (10, 6)) -> None:
         # 增量地绘制多条线
         if legend is None:
             legend = []
@@ -85,7 +87,7 @@ class Animator:
             self.display_available = False
             print("IPython display不可用，将使用plt.show()")
 
-    def add(self, x, y):
+    def add(self, x: Union[float, List[float]], y: Union[float, List[float]]) -> None:
         # 向图表中添加多个数据点
         if not hasattr(y, "__len__"):
             y = [y]
@@ -131,7 +133,7 @@ class Animator:
 # 数据加载
 print("正在加载Fashion-MNIST数据集...")
 batch_size = 256
-def load_data_fashion_mnist(batch_size, resize=None):
+def load_data_fashion_mnist(batch_size: int, resize: Optional[int] = None) -> Tuple[DataLoader, DataLoader]:
     """Download the Fashion-MNIST dataset and then load it into memory.
 
     Defined in :numref:`sec_utils`"""
@@ -163,21 +165,21 @@ def softmax(X: Tensor) -> Tensor:
     partition = X_exp.sum(1, keepdim=True)
     return X_exp / partition # 应用广播机制
 
-def net(X: Tensor):
+def net(X: Tensor) -> Tensor:
     return softmax(torch.matmul(X.reshape(-1, W.shape[0]), W) + b)
 
 # 作为loss函数
-def cross_entropy(y_hat: Tensor, y: Tensor) -> float:
+def cross_entropy(y_hat: Tensor, y: Tensor) -> Tensor:
     return - torch.log(y_hat[range(len(y_hat)), y])
 
 
 def accuracy(y_hat: Tensor, y: Tensor) -> float:
-    if len(y_hat.shape) > 1 and y_hat.shape[1] > 1:
-        y_hat = y_hat.argmax(dim = 1)
+    if len(y_hat.shape) > 1:
+        y_hat = y_hat.argmax(dim=1)
     cmp = y_hat.type(y.dtype) == y
     return float(cmp.type(y.dtype).sum())
 
-def evaluate_accuracy(net, data_iter):
+def evaluate_accuracy(net: Union[torch.nn.Module, Any], data_iter: DataLoader) -> float:
     """计算net在指定测试数据集上的精度"""
     if isinstance(net, torch.nn.Module):
         net.eval()
@@ -187,16 +189,17 @@ def evaluate_accuracy(net, data_iter):
             metric.add(accuracy(net(X), y), y.numel())
         return metric[0] / metric[1]
 
-def train_epoch_ch3(net, train_iter, loss, updater):
+def train_epoch_ch3(net: Union[torch.nn.Module, Any], train_iter: DataLoader,
+                   loss: Any, updater: Union[torch.optim.Optimizer, Any]) -> Tuple[float, float]:
     if isinstance(net, torch.nn.Module):
         net.train()
     metric = Accumulator(3)
     for X, y in train_iter:
-        y_hat = net(X)
-        l = loss(y_hat, y)
+        y_hat = net(X) # 前向传播
+        l = loss(y_hat, y) # 计算损失
         if isinstance(updater, torch.optim.Optimizer):
             updater.zero_grad()
-            l.mean().backward()
+            l.mean().backward() # 反向传播
             updater.step()
         else:
             l.mean().backward()
@@ -204,7 +207,7 @@ def train_epoch_ch3(net, train_iter, loss, updater):
         metric.add(float(l.sum()), accuracy(y_hat, y), y.numel())
     return metric[0] / metric[2], metric[1] / metric[2] # loss, accuracy
 
-def sgd(params: List[Tensor], lr: float):
+def sgd(params: List[Tensor], lr: float) -> None:
     with torch.no_grad():
         for param in params:
             grad = param.grad
@@ -213,10 +216,12 @@ def sgd(params: List[Tensor], lr: float):
             grad.zero_()
 
 lr = 0.1
-def updater():
+def updater() -> None:
     sgd([W, b], lr)
 
-def train_ch3(net, train_iter, test_iter, loss, num_epochs, updater):
+def train_ch3(net: Union[torch.nn.Module, Any], train_iter: DataLoader,
+              test_iter: DataLoader, loss: Any, num_epochs: int,
+              updater: Union[torch.optim.Optimizer, Any]) -> None:
     animator = Animator(xlabel="epoch", xlim=[1, num_epochs], ylim=[0.0, 1.0], legend=['train loss', 'train acc', 'test acc'])
     for epoch in range(num_epochs):
         train_loss, train_acc = train_epoch_ch3(net, train_iter, loss, updater)
@@ -227,7 +232,7 @@ def train_ch3(net, train_iter, test_iter, loss, num_epochs, updater):
     assert test_acc <= 1 and test_acc > 0.7, test_acc
 
 
-def predict_ch3(net, test_iter, n=6):
+def predict_ch3(net: Union[torch.nn.Module, Any], test_iter: DataLoader, n: int = 6) -> None:
     for X, y in test_iter:
         break
     trues = d2l.get_fashion_mnist_labels(y)
