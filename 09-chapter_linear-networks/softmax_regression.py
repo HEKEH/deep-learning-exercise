@@ -130,9 +130,6 @@ class Animator:
         except:
             pass
 
-# 数据加载
-print("正在加载Fashion-MNIST数据集...")
-batch_size = 256
 def load_data_fashion_mnist(batch_size: int, resize: Optional[int] = None) -> Tuple[DataLoader, DataLoader]:
     """Download the Fashion-MNIST dataset and then load it into memory.
 
@@ -149,15 +146,7 @@ def load_data_fashion_mnist(batch_size: int, resize: Optional[int] = None) -> Tu
                                         num_workers=4),
             torch.utils.data.DataLoader(mnist_test, batch_size, shuffle=False,
                                         num_workers=4))
-train_iter, test_iter = load_data_fashion_mnist(batch_size)
-
 # 以下是训练的主体内容
-
-number_inputs = 28 * 28
-number_outputs = 10
-W = torch.normal(0, 0.01, size=(number_inputs, number_outputs), requires_grad=True)
-b = torch.zeros(number_outputs, requires_grad=True)
-# XW + b
 
 # 归一化指数函数
 def softmax(X: Tensor) -> Tensor:
@@ -165,6 +154,11 @@ def softmax(X: Tensor) -> Tensor:
     partition = X_exp.sum(1, keepdim=True)
     return X_exp / partition # 应用广播机制
 
+number_inputs = 28 * 28
+number_outputs = 10
+W = torch.normal(0, 0.01, size=(number_inputs, number_outputs), requires_grad=True)
+b = torch.zeros(number_outputs, requires_grad=True)
+# XW + b
 def net(X: Tensor) -> Tensor:
     return softmax(torch.matmul(X.reshape(-1, W.shape[0]), W) + b)
 
@@ -246,6 +240,12 @@ def predict_ch3(net: Union[torch.nn.Module, Any], test_iter: DataLoader, n: int 
 # 开始训练
 if __name__ == "__main__":
     try:
+        # 数据加载
+        print("正在加载Fashion-MNIST数据集...")
+        batch_size = 256
+        train_iter, test_iter = load_data_fashion_mnist(batch_size)
+
+
         num_epochs = 6
         train_ch3(net, train_iter, test_iter, cross_entropy, num_epochs, updater)
 
@@ -261,3 +261,8 @@ if __name__ == "__main__":
         print(f"训练过程中出现错误: {e}")
         import traceback
         traceback.print_exc()
+
+__all__ = [
+    'load_data_fashion_mnist',
+    'train_ch3'
+]
