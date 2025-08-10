@@ -150,9 +150,9 @@ def load_data_fashion_mnist(batch_size: int, resize: Optional[int] = None) -> Tu
 
 # 归一化指数函数
 def softmax(X: Tensor) -> Tensor:
-    X_exp = torch.exp(X)
-    partition = X_exp.sum(1, keepdim=True)
-    return X_exp / partition # 应用广播机制
+    X_exp = torch.exp(X) # n * m, n个样本，m个类别
+    partition = X_exp.sum(1, keepdim=True) # n * 1
+    return X_exp / partition # 分母应用广播机制，n * m
 
 number_inputs = 28 * 28
 number_outputs = 10
@@ -168,6 +168,7 @@ def cross_entropy(y_hat: Tensor, y: Tensor) -> Tensor:
 
 
 def accuracy(y_hat: Tensor, y: Tensor) -> float:
+    # y_hat是 n * m, y是 n * 1
     if len(y_hat.shape) > 1:
         y_hat = y_hat.argmax(dim=1)
     cmp = y_hat.type(y.dtype) == y
