@@ -1,3 +1,4 @@
+# MLP: multi-layer perceptron
 import torch
 from torch import nn
 from softmax_regression import load_data_fashion_mnist, train_ch3
