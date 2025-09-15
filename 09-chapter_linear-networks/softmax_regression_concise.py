@@ -1,6 +1,9 @@
 import torch
 from torch import nn
-from softmax_regression import load_data_fashion_mnist, train_ch3
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools import load_data_fashion_mnist, train_ch3
 
 batch_size = 256
 train_iter, test_iter = load_data_fashion_mnist(batch_size)
