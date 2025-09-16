@@ -37,6 +37,7 @@ def sgd(params: List[Tensor], lr: float) -> None:
             grad.zero_()
 
 lr = 0.1
+# trainer
 def updater() -> None:
     sgd([W, b], lr)
 
