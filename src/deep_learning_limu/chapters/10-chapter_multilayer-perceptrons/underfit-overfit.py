@@ -3,11 +3,7 @@ import numpy as np
 import torch
 from torch import nn
 from d2l import torch as d2l
-
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from tools import Accumulator, Animator, train_epoch_ch3
+from deep_learning_limu.tools import Accumulator, Animator, train_epoch_ch3
 
 max_degree = 20
 n_train, n_test = 100, 100
@@ -24,6 +20,7 @@ for i in range(max_degree):
 labels = np.dot(poly_features, true_w)
 labels += np.random.normal(scale=0.1, size=labels.shape)
 
+# NumPy ndarray转换为tensor
 true_w, features, poly_features, labels = [torch.tensor(x, dtype=torch.float32) for x in [true_w, features, poly_features, labels]]
 
 def evaluate_loss(net, data_iter, loss):
@@ -39,6 +36,7 @@ def evaluate_loss(net, data_iter, loss):
 def train(train_features, test_features, train_labels, test_labels, num_epochs=400):
     loss = nn.MSELoss(reduction='none')
     input_shape = train_features.shape[-1]
+    # 不设置偏置，因为我们已经在多项式中实现了它
     net = nn.Sequential(nn.Linear(input_shape, 1, bias=False))
     batch_size = min(10, train_labels.shape[0])
     train_iter = d2l.load_array((train_features, train_labels.reshape(-1, 1)), batch_size)
@@ -53,7 +51,7 @@ def train(train_features, test_features, train_labels, test_labels, num_epochs=4
             animator.add(epoch + 1, (evaluate_loss(net, train_iter, loss), evaluate_loss(net, test_iter, loss)))
     print('weight:', net[0].weight.data.numpy())
 
-# # 正常
+# # 正常,从多项式特征中选择前4个维度，即1,x,x^2/2!,x^3/3!
 # train(poly_features[:n_train, :4], poly_features[n_train:, :4], labels[:n_train], labels[n_train:])
 # # 欠拟合
 # train(poly_features[:n_train, :2], poly_features[n_train:, :2], labels[:n_train], labels[n_train:])

@@ -1,14 +1,8 @@
 import torch
 import matplotlib.pyplot as plt
-import sys
-import os
 from torch import Tensor
 from typing import List
-
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from tools import load_data_fashion_mnist, train_ch3, predict_ch3
+from deep_learning_limu.tools import load_data_fashion_mnist, train_ch3, predict_ch3
 
 # 归一化指数函数
 def softmax(X: Tensor) -> Tensor:
