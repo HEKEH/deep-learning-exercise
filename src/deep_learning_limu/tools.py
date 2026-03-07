@@ -42,6 +42,10 @@ def setup_matplotlib() -> bool:
 # 初始化matplotlib
 setup_matplotlib()
 
+reduce_sum = lambda x, *args, **kwargs: x.sum(*args, **kwargs)
+
+size = lambda x, *args, **kwargs: x.numel(*args, **kwargs)
+
 class Accumulator:
     def __init__(self, n: int) -> None:
         self.data = [0.0] * n
@@ -207,4 +211,52 @@ def predict_ch3(net: Union[torch.nn.Module, Any], test_iter: DataLoader, n: int 
     cols = min(n, 6)
     d2l.show_images(X[0:n].reshape(n, 28, 28), rows, cols, titles=titles)
 
+reshape = lambda x, *args, **kwargs: x.reshape(*args, **kwargs)
 
+def synthetic_data(w, b, num_examples):
+    """Generate y = Xw + b + noise.
+
+    Defined in :numref:`sec_utils`"""
+    X = torch.normal(0, 1, (num_examples, len(w)))
+    y = torch.matmul(X, w) + b
+    y += torch.normal(0, 0.01, y.shape)
+    return X, reshape(y, (-1, 1))
+
+def load_array(data_arrays, batch_size, is_train=True):
+    """Construct a PyTorch data iterator.
+
+    Defined in :numref:`sec_utils`"""
+    dataset = torch.utils.data.TensorDataset(*data_arrays)
+    return torch.utils.data.DataLoader(dataset, batch_size, shuffle=is_train)
+
+def linreg(X: Tensor, w: Tensor, b: Tensor) -> Tensor:
+    return torch.matmul(X, w) + b
+
+def squared_loss(y_hat: Tensor, y: Tensor) -> Tensor:
+    return (y_hat - y.reshape(y_hat.shape)) ** 2 / 2
+
+def sgd(params: List[Tensor], lr: float) -> None:
+    """Stochastic Gradient Descent, 随机梯度下降"""
+    with torch.no_grad():
+        for param in params:
+            param -= lr * param.grad
+            param.grad.zero_()
+
+def evaluate_loss(net: Union[torch.nn.Module, Any], data_iter: DataLoader, loss: Any) -> float:
+    """评估给定数据集上模型的损失"""
+    was_training = False
+    if isinstance(net, torch.nn.Module):
+        was_training = net.training
+        net.eval()
+    metric = Accumulator(2)
+    try:
+        with torch.no_grad():
+            for X, y in data_iter:
+                out = net(X)
+                y = reshape(y, out.shape)
+                l = loss(out, y)
+                metric.add(reduce_sum(l), size(l))
+            return metric[0] / metric[1]
+    finally:
+        if was_training:
+            net.train()
