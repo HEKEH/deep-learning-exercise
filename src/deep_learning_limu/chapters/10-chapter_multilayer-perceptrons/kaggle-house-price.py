@@ -1,3 +1,11 @@
+# 房价预测
+# 学习点:
+# 1. 使用K折交叉验证来训练
+# 2. 使用Adam优化器
+# 3. 使用 (x - x.mean()) / (x.std()) 标准化数据
+# 4. 使用 pd.get_dummies(all_features, dummy_na=True) 处理离散特征
+# 5. 训练数据的目的是调整超参数
+
 import pandas as pd
 import torch
 from torch import nn
