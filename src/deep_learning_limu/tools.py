@@ -42,6 +42,85 @@ def setup_matplotlib() -> bool:
 # 初始化matplotlib
 setup_matplotlib()
 
+
+def _set_figsize(figsize: Tuple[float, float] = (3.5, 2.5)) -> None:
+    """设置 matplotlib 图形尺寸（供 plot 内部使用）。"""
+    plt.rcParams["figure.figsize"] = figsize
+
+
+def _set_axes(
+    axes: Any,
+    xlabel: Optional[str],
+    ylabel: Optional[str],
+    xlim: Optional[Tuple[float, float]],
+    ylim: Optional[Tuple[float, float]],
+    xscale: str,
+    yscale: str,
+    legend: List[str],
+) -> None:
+    """设置坐标轴（供 plot 内部使用）。"""
+    axes.set_xlabel(xlabel or "")
+    axes.set_ylabel(ylabel or "")
+    axes.set_xscale(xscale)
+    axes.set_yscale(yscale)
+    if xlim is not None:
+        axes.set_xlim(xlim)
+    if ylim is not None:
+        axes.set_ylim(ylim)
+    if legend:
+        axes.legend(legend)
+    axes.grid()
+
+
+def plot(
+    X: Union[list, Any],
+    Y: Optional[Union[list, Any]] = None,
+    xlabel: Optional[str] = None,
+    ylabel: Optional[str] = None,
+    legend: Optional[List[str]] = None,
+    xlim: Optional[Tuple[float, float]] = None,
+    ylim: Optional[Tuple[float, float]] = None,
+    xscale: str = "linear",
+    yscale: str = "linear",
+    fmts: Tuple[str, ...] = ("-", "m--", "g-.", "r:"),
+    figsize: Tuple[float, float] = (3.5, 2.5),
+    axes: Optional[Any] = None,
+    save_name: Optional[str] = "plot.png",
+) -> None:
+    """与 d2l.torch.plot 行为一致的绘图，并将图形保存到 plots 目录。"""
+    if legend is None:
+        legend = []
+
+    def has_one_axis(X_data):  # True if X (tensor or list) has 1 axis
+        return (hasattr(X_data, "ndim") and X_data.ndim == 1) or (
+            isinstance(X_data, list) and not hasattr(X_data[0], "__len__")
+        )
+
+    if has_one_axis(X):
+        X = [X]
+    if Y is None:
+        X, Y = [[]] * len(X), X
+    elif has_one_axis(Y):
+        Y = [Y]
+    if len(X) != len(Y):
+        X = X * len(Y)
+
+    _set_figsize(figsize)
+    if axes is None:
+        axes = plt.gca()
+    axes.cla()
+    for x, y, fmt in zip(X, Y, fmts):
+        if len(x):
+            axes.plot(x, y, fmt)
+        else:
+            axes.plot(y, fmt)
+    _set_axes(axes, xlabel, ylabel, xlim, ylim, xscale, yscale, legend)
+
+    os.makedirs("plots", exist_ok=True)
+    path = os.path.join("plots", save_name or "plot.png")
+    plt.savefig(path, dpi=150, bbox_inches="tight")
+    # plt.show()
+
 reduce_sum = lambda x, *args, **kwargs: x.sum(*args, **kwargs)
 
 size = lambda x, *args, **kwargs: x.numel(*args, **kwargs)

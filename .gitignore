@@ -1,4 +1,4 @@
-data
+data/FashionMNIST
 plots
 **/__pycache__
 *.py[cod]

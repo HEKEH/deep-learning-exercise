@@ -1,7 +1,7 @@
-import math
-import numpy as np
+# 权重衰减
+
 import torch
-from deep_learning_limu.tools import Accumulator, Animator, evaluate_loss, linreg, load_array, sgd, squared_loss, synthetic_data, train_epoch_ch3
+from deep_learning_limu.tools import Animator, evaluate_loss, linreg, load_array, sgd, squared_loss, synthetic_data
 
 n_train, n_test, num_inputs, batch_size = 20, 100, 200, 5
 true_w, true_b = torch.ones((num_inputs, 1)) * 0.01, 0.05
