@@ -4,7 +4,7 @@
 # 2. 使用Adam优化器
 # 3. 使用 (x - x.mean()) / (x.std()) 标准化数据
 # 4. 使用 pd.get_dummies(all_features, dummy_na=True) 处理离散特征
-# 5. 训练数据的目的是调整超参数
+# 5. k折交叉验证训练数据的目的是调整超参数
 
 import pandas as pd
 import torch
@@ -40,6 +40,7 @@ train_labels = torch.tensor(
     train_data.SalePrice.values.reshape(-1, 1), dtype=torch.float32
 )
 
+# 均方误差损失函数
 loss = nn.MSELoss()
 in_features = train_features.shape[1]
 
@@ -133,6 +134,7 @@ k, num_epochs, lr, weight_decay, batch_size = 5, 100, 5, 0, 64
 # print(f"{k}-fold validation: avg train rmse {train_l:f}, avg valid rmse {valid_l:f}")
 
 
+# 通过k折交叉验证得到最优的超参数，然后进入真正的模型训练，并预测测试集
 def train_and_pred(
     train_features,
     test_features,
@@ -166,6 +168,7 @@ def train_and_pred(
         save_name="kaggle_house_price_rmse.png",
     )
     print(f"train log rmse {float(train_ls[-1]):f}")
+    # 使用训练好的模型预测测试集
     test_pred = net(test_features).detach().numpy()
     submission = pd.concat(
         [test_data["Id"], pd.Series(test_pred.reshape(1, -1)[0], name="SalePrice")],
