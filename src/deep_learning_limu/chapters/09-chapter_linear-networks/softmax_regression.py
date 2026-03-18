@@ -20,7 +20,7 @@ def net(X: Tensor) -> Tensor:
 
 # 作为loss函数
 def cross_entropy(y_hat: Tensor, y: Tensor) -> Tensor:
-    return - torch.log(y_hat[range(len(y_hat)), y])
+    return - torch.log(y_hat[range(len(y_hat)), y]).mean()
 
 def sgd(params: List[Tensor], lr: float) -> None:
     with torch.no_grad():

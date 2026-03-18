@@ -61,7 +61,7 @@ class Net(nn.Module):
 net = Net(num_inputs, num_outputs, num_hiddens1, num_hiddens2, dropout1, dropout2)
 
 num_epochs, lr, batch_size = 10, 0.5, 256
-loss = nn.CrossEntropyLoss(reduction="none")  # 交叉熵计算
+loss = nn.CrossEntropyLoss(reduction="mean")  # 交叉熵计算
 train_iter, test_iter = load_data_fashion_mnist(batch_size)
 trainer = torch.optim.SGD(net.parameters(), lr=lr)
 train_ch3(net, train_iter, test_iter, loss, num_epochs, trainer)

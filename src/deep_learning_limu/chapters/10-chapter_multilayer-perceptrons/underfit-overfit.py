@@ -40,7 +40,7 @@ def evaluate_loss(net, data_iter, loss):
 # train_features的size为 (100, 20)，test_features的size为 (100, 20), train_labels的size为 100, test_labels的size为 100
 def train(train_features, test_features, train_labels, test_labels, num_epochs=400):
     # Mean Squared Error 均方误差。所有样本的损失的平均值
-    loss = nn.MSELoss(reduction='none')
+    loss = nn.MSELoss(reduction='mean')
     input_shape = train_features.shape[-1]
     # 不设置偏置，因为我们已经在多项式中实现了它
     net = nn.Sequential(nn.Linear(input_shape, 1, bias=False))

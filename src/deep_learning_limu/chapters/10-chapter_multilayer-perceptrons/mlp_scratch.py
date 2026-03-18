@@ -23,7 +23,7 @@ def net(X):
     H = relu(X @ W1 + b1) # 这里“@”代表矩阵乘法
     return H @ W2 + b2
 
-loss = nn.CrossEntropyLoss(reduction='none') # 与计算损失、反向转播相关
+loss = nn.CrossEntropyLoss(reduction='mean') # 与计算损失、反向转播相关
 
 trainer = torch.optim.SGD(params, lr=0.1) # 用于更新参数
 

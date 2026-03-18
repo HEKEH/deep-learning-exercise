@@ -259,10 +259,10 @@ def train_epoch_ch3(net: Union[torch.nn.Module, Any], train_iter: DataLoader,
         l = loss(y_hat, y) # 计算损失
         if isinstance(updater, torch.optim.Optimizer):
             updater.zero_grad()
-            l.mean().backward() # 反向传播
+            l.backward() # 反向传播
             updater.step()
         else:
-            l.mean().backward()
+            l.backward()
             updater()
         metric.add(float(l.sum()), accuracy(y_hat, y), y.numel())
     return metric[0] / metric[2], metric[1] / metric[2] # loss, accuracy

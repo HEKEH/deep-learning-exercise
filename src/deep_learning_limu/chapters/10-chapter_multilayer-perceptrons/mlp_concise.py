@@ -18,7 +18,7 @@ def init_weights(m):
 
 net.apply(init_weights)
 
-loss = nn.CrossEntropyLoss(reduction='none') # 交叉熵计算。与计算损失、反向转播相关
+loss = nn.CrossEntropyLoss(reduction='mean') # 交叉熵计算。与计算损失、反向转播相关
 trainer = torch.optim.SGD(net.parameters(), lr=0.1) # 用于更新参数
 
 num_epochs = 10

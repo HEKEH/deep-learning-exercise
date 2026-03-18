@@ -11,7 +11,7 @@ def init_weight(m):
         nn.init.normal_(m.weight, std=0.01)
 net.apply(init_weight) # 前向传播
 
-loss = nn.CrossEntropyLoss(reduction='none') # 与计算损失、反向转播相关
+loss = nn.CrossEntropyLoss(reduction='mean') # 与计算损失、反向转播相关
 
 parameters = net.parameters()
 trainer = torch.optim.SGD(parameters, lr=0.1) # 用于更新参数
